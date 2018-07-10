@@ -1,14 +1,19 @@
 from django.shortcuts import render
 
-from . import models
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from . import permissions
 from rest_framework.authentication import TokenAuthentication
-from . import serializers
 from rest_framework import filters
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework.authtoken.views import ObtainAuthToken
+
+from . import serializers
+from . import models
+from . import permissions
+
+
 
 class HelloApiView(APIView):
     """Test API View"""
@@ -55,7 +60,6 @@ class HelloApiView(APIView):
 
         return Response({'method':'delete'})
 
-
 class HelloViewSet(viewsets.ViewSet):
     """Test API ViewSet."""
     serializer_class = serializers.HelloSerializer
@@ -101,8 +105,6 @@ class HelloViewSet(viewsets.ViewSet):
         """Handles removing of an object."""
         return Response({'http_method':'DELETE'})
 
-
-
 class UserProfileViewSet(viewsets.ModelViewSet):
     """Handles creating, reading and updating profiles."""
 
@@ -112,3 +114,14 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     permission_classes = (permissions.UpdateOwnProfile,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name','email',)
+
+
+class LoginViewSet(viewsets.ViewSet):
+    """Checks email and password and returns an auth token."""
+
+    serializer_class = AuthTokenSerializer
+
+    def create(self, request):
+        """Use the ObtainAuthToken APIView to validate and create a token."""
+
+        return ObtainAuthToken().post(request)
